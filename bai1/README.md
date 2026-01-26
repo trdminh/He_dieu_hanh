@@ -1,6 +1,6 @@
 # Hệ Điều Hành Nhúng
 
-### Tuần 1
+### Bài 1
 
 ##### 1. Cài đặt crosstool-NG
 
