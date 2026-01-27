@@ -37,8 +37,8 @@ Build toolchain
 
 Kiểm tra toolchain
 ```bash
-export PATH=$HOME/x-tools/arm-training-linux-musleabihf/bin:$PATH
-arm-training-linux-musleabihf-gcc --version
+export PATH=$HOME/x-tools/arm-unknown-linux-gnueabi/bin:$PATH
+arm-unknown-linux-gnueabi-gcc --version
 ```
 
 ##### 2. Viết 1 chương trình C đơn giản. Sử dụng Cross Toolchain ở mục 1. biên dịch thành công chương trình C. Dùng lệnh file hoặc readelf để xác nhận thông tin đã biên dịch chéo
@@ -62,7 +62,7 @@ int main(void) {
 
 Build code trên với crosstool-NG và biên dịch chương trình
 ```bash
-arm-unknown-linux-gnueabi-gcc main.c -o hello_world
+arm-unknown-linux-gnueabi-gcc main.c -static -o hello_world
 ```
 
 Check file vừa được tạo ra
