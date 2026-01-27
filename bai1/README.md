@@ -16,8 +16,8 @@ cd crosstool-ng-1.28.0/
 
 Tải các package cần thiết cho toolchain
 ```bash
-sudo apt install build-essential git autoconf bison flex texinfo help2man gawk \ 
-libtool-bin libncurses5-dev unzip build-essential
+sudo apt install build-essential git autoconf bison flex texinfo help2man gawk libtool-bin libncurses5-dev unzip build-essential
+
 
 sudo apt install make
 ```
