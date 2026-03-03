@@ -45,6 +45,16 @@ ttyS0::askfirst:/bin/sh
 ::shutdown:/bin/umount -a -r
 EOF
 
+cat > etc/init.d/rcS << 'EOF'
+#!/bin/sh
+
+mount -t proc none /proc
+mount -t sysfs none /sys
+mount -t devtmpfs none /dev
+
+echo "System booted successfully"
+EOF
+
 chmod +x etc/init.d/rcS
 
 echo "root:x:0:0:root:/root:/bin/sh" > etc/passwd
@@ -65,15 +75,44 @@ sudo mkfs.vfat -I /dev/sda
 export DISK=/dev/sda
 sudo dd if=/dev/zero of=${DISK} bs=1M count=10
 ```
+- Tải uboot
+``` bash
+sudo dd if=./u-boot/MLO of=${DISK} count=2 seek=1 bs=128k
+sudo dd if=./u-boot/u-boot-dtb.img of=${DISK} count=4 seek=1 bs=384k
+```
 
+- Tạo partition layout
+``` bash
+sudo sfdisk ${DISK} <<-__EOF__
+4M,,L,*
+__EOF__
+ 
+sudo mkfs.ext4 -L rootfs -O ^metadata_csum,^64bit ${DISK}1
+
+sudo mkdir -p /media/rootfs/
+sudo mount ${DISK}1 /media/rootfs/
+```
+- Backup bootloader
+``` bash
+sudo mkdir -p /media/rootfs/opt/backup/uboot/
+sudo cp -v ./u-boot/MLO /media/rootfs/opt/backup/uboot/
+sudo cp -v ./u-boot/u-boot-dtb.img /media/rootfs/opt/backup/uboot/
+```
+- Setup kernel
+``` bash
+export kernel_version=5.4.288-bone69
+mkdir /media/rootfs/boot/uEnv.txt
+sudo sh -c "echo 'uname_r=${kernel_version}' >> /media/rootfs/boot/uEnv.txt"
+
+setenv bootargs console=ttyS0,115200n8 root=/dev/mmcblk0p1 rw rootfstype=ext4
+```
 - Copy dữ liệu
 ``` bash
-sudo mount /dev/mmcblk0p2 /mnt
 
-sudo cp -a _install/* /mnt/
+sudo cp -a _install/* /media/rootfs
 sync
 
-sudo umount /mnt
+sudo umount /media/rootfs
 ```
 
 ##### 3. Boot với SDcard
