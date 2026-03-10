@@ -22,7 +22,7 @@ make -j$(nproc)
 
 - Đưa vào thẻ nhớ
 ``` bash
-sudo dd if=output/images/sdcard.img of=/dev/sdX bs=4M status=progress
+sudo dd if=output/images/sdcard.img of=/dev/sdb bs=4M status=progress
 sync
 ```
 - Sửa file extlinux.conf trong phân vùng boot
