@@ -95,7 +95,7 @@ HELLO_SITE = $(TOPDIR)/package/hello/src
 HELLO_SITE_METHOD = local
 
 define HELLO_BUILD_CMDS
-  $(TARGET_CC) -static $(@D)/hello.c -o hello
+  $(TARGET_CC) -static $(@D)/hello.c -o $(@D)hello
 endef
 
 define HELLO_INSTALL_TARGET_CMDS
@@ -104,5 +104,25 @@ endef
 
 $(eval $(generic-package))
 ```
+- Tạo file Config.in
+``` bash
+nano Config.in
+```
+
+``` bash
+config BR2_PACKAGE_HELLO
+  bool "hello"
+  help
+    Simple Hello World program
+```
+- Thêm config của package 
+``` bash
+nano ~/Desktop/buildroot/package/Config.in
+
+source "package/hello/Config.in"
+```
 
 - Build lại 
+``` bash
+make -j$(nproc)
+```
