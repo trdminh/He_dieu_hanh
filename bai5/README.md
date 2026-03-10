@@ -165,5 +165,118 @@ sudo cp test_dynamic /media/minh/rootfs/usr/bin
 ##### 3. Tích hợp ứng dụng và thư viện và Buildroot
 - Tạo package trong buildroot
 ``` bash
-mkdir ~/Desktop/buildroot/package/helloapp
+mkdir ~/Desktop/buildroot/package/helloapp & cd ~/Desktop/buildroot/package/helloapp
 ```
+
+- Tạo makefile và Config.in
+``` bash
+nano helloapp.mk
+
+HELLOAPP_VERSION = 1.0
+HELLOAPP_SITE = $(TOPDIR)/package/helloapp/src
+HELLOAPP_SITE_METHOD = local
+
+HELLOAPP_DEPENDENCIES = cjson
+
+define HELLOAPP_BUILD_CMDS
+	$(TARGET_CC) $(@D)/helloapp.c $(@D)/mymath.c \
+	-I$(@D) -o $(@D)/helloapp -lcjson
+endef
+
+define HELLOAPP_INSTALL_TARGET_CMDS
+	$(INSTALL) -D -m 0755 $(@D)/helloapp \
+	$(TARGET_DIR)/usr/bin/helloapp
+endef
+
+$(eval $(generic-package))
+```
+
+``` bash
+nano Config.in
+
+config BR2_PACKAGE_HELLOAPP
+    bool "helloapp"
+    depends on BR2_PACKAGE_CJSON
+    help
+      Example app using cJSON and mymath library
+```
+
+- Tạo file code và thư viện
+ + Tạo thư viện:
+    ``` bash
+    nano mymath.c
+
+    #include "mymath.h"
+
+    int add(int a, int b){
+        return a + b;
+    }
+    ```
+
+    ``` bash
+    nano mymath.h
+    #ifndef MYMATH_H
+    #define MYMATH_H
+
+    int add(int a, int b);
+
+    #endif
+    ```
+ + Tạo file helloapp.c
+    ``` bash
+    #include <stdio.h>
+    #include <cjson/cJSON.h>
+    #include "mymath.h"
+
+    int main() {
+
+        const char *json_string = "{\"a\":5,\"b\":7}";
+
+        cJSON *json = cJSON_Parse(json_string);
+
+        if(json == NULL){
+            printf("JSON parse error\n");
+            return -1;
+        }
+
+        cJSON *a = cJSON_GetObjectItem(json, "a");
+        cJSON *b = cJSON_GetObjectItem(json, "b");
+
+        int result = add(a->valueint, b->valueint);
+
+        printf("a = %d\n", a->valueint);
+        printf("b = %d\n", b->valueint);
+        printf("a + b = %d\n", result);
+
+        cJSON_Delete(json);
+
+        return 0;
+    }
+    ```
+- Thêm package vào package/Config.in
+``` bash
+nano ~Desktop/buildroot/package/Config.in
+
+source "package/helloapp/Config.in"
+```
+
+- Chạy menuconfig để thêm package mới 
+``` bash
+make menuconfig
+
+Target package
+    [*] helloapp
+```
+- Build lại
+``` bash
+make -j$(nproc)
+```
+
+
+- Đưa vào thẻ nhớ
+``` bash
+sudo dd if=output/images/sdcard.img of=/dev/sdb bs=4M status=progress
+sync
+```
+
+- Kết quả
